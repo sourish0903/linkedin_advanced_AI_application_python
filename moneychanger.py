@@ -23,7 +23,7 @@ client = OpenAI(
     api_key=GITHUB_TOKEN,
 )
 
-@traceable
+@tracable
 def get_exchange_rate(base: str, target: str, amount: str) -> Tuple:
     """Return a tuple of (base, target, amount, conversion_result (2 decimal places))"""
     load_dotenv()
@@ -32,7 +32,7 @@ def get_exchange_rate(base: str, target: str, amount: str) -> Tuple:
     data = response.json()
     return (base, target, amount, f'{data["conversion_result"]:.2f}')
 
-@traceable
+@tracable
 def call_llm(textbox_input) -> Dict:
     """Make a call to the LLM with the textbox_input as the prompt.
        The output from the LLM should be a JSON (dict) with the base, amount and target"""
@@ -92,7 +92,7 @@ def call_llm(textbox_input) -> Dict:
     else:
         return response#.choices[0].message.content
 
-@traceable
+@tracable
 def run_pipeline(textbox_input):
     """Based on textbox_input, determine if you need to use the tools (function calling) for the LLM.
     Call get_exchange_rate(...) if necessary"""
