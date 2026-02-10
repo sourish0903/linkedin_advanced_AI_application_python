@@ -7,16 +7,23 @@ import json
 import streamlit as st
 import os
 from openai import OpenAI
+from langsmith import wrappers, tracable
 
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 EXCHANGERATE_API_KEY = os.getenv('EXCHANGERATE_API_KEY')
 endpoint = "https://models.inference.ai.azure.com"
 model_name = "gpt-4o-mini"
+os.environ['LANGCHAIN_TRACING_V2'] = True
+LANGSMITH_API_KEY = os.getenv('LANGSMITH_API_KEY')
+os.environ['LANGCHAIN_API_KEY'] = LANGSMITH_API_KEY
+os.environ['LANGCHAIN_PROJECT'] = 'moneychanger'
 
 client = OpenAI(
     base_url=endpoint,
     api_key=GITHUB_TOKEN,
 )
+
+@traceable
 def get_exchange_rate(base: str, target: str, amount: str) -> Tuple:
     """Return a tuple of (base, target, amount, conversion_result (2 decimal places))"""
     load_dotenv()
@@ -25,7 +32,7 @@ def get_exchange_rate(base: str, target: str, amount: str) -> Tuple:
     data = response.json()
     return (base, target, amount, f'{data["conversion_result"]:.2f}')
 
-
+@traceable
 def call_llm(textbox_input) -> Dict:
     """Make a call to the LLM with the textbox_input as the prompt.
        The output from the LLM should be a JSON (dict) with the base, amount and target"""
@@ -85,7 +92,7 @@ def call_llm(textbox_input) -> Dict:
     else:
         return response#.choices[0].message.content
 
-
+@traceable
 def run_pipeline(textbox_input):
     """Based on textbox_input, determine if you need to use the tools (function calling) for the LLM.
     Call get_exchange_rate(...) if necessary"""
