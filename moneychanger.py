@@ -22,8 +22,32 @@ def get_exchange_rate(base: str, target: str, amount: str) -> Tuple:
 def call_llm(textbox_input) -> Dict:
     """Make a call to the LLM with the textbox_input as the prompt.
        The output from the LLM should be a JSON (dict) with the base, amount and target"""
-    try:
-        
+    functions = [
+        {
+            "name": "get_exchange_rate",
+            "description": "Get current exchange rate value using the function arguments from https://v6.exchangerate-api.com/v6.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "base": {
+                        "type": "string",
+                        "description": "Base currency(e.g. 'GBP'.),the currency the prompt asking to convert. eg. in a prompt convert 100 GBP to to USD GBP is base(Base currency)",
+                    },
+                    "target": {
+                        "type": "string",
+                        "description": "target currency code representing the currency into which the base amount will be converted. three-letter currency code supported by the ExchangeRate API (e.g., 'USD', 'INR', 'GBP') eg. in a prompt convert 100 GBP to to USD USD is target currency",
+                    },
+                    "amount": {
+                        "type": "string",
+                        "description": "The amount in the base currency to be converted.",
+                    },
+                },
+                "required": ["base", "target", "amount"],
+            },
+        },
+    ]
+    
+    try: 
         endpoint = "https://models.github.ai/inference"
         model_name = "openai/gpt-4o-mini"
 
@@ -46,11 +70,12 @@ def call_llm(textbox_input) -> Dict:
             temperature=1.0,
             top_p=1.0,
             max_tokens=1000,
-            model=model_name
+            model=model_name,
+            functions=functions,
         )
 
-        answer = response.choices[0].message.content
-        return answer
+        # answer = response.choices[0].message.content
+        return response
     except Exception as e:
         print(f"Exception {e} for {textbox_input}")
 
@@ -58,40 +83,9 @@ def call_llm(textbox_input) -> Dict:
 def run_pipeline(textbox_input):
     """Based on textbox_input, determine if you need to use the tools (function calling) for the LLM.
     Call get_exchange_rate(...) if necessary"""
-     
-    # try:
-        
-    #     endpoint = "https://models.github.ai/inference"
-    #     model_name = "openai/gpt-4o-mini"
 
-    #     client = OpenAI(
-    #         base_url=endpoint,
-    #         api_key=GITHUB_TOKEN,
-    #     )
-
-    #     response = client.chat.completions.create(
-    #         messages=[
-    #             {
-    #                 "role": "system",
-    #                 "content": f"You are a helpful assistant to determine whether the user query {textbox_input} is a currency conversion" 
-    #                 "query or not if the {textbox_input} has mention of conversion from one currency to another the answer will be True else it's false"
-    #                 "the {textbox_input} may not explicitely mention 2 currencies(eg. EUR and USD),rather it may indicate name of 2 countries"
-    #                 "eg. what is the value of 250 EUR in Newyork money means a conversion from EUR to USD. The user query {textbox_input} may be in other languages"
-    #                 "than English. Your answer will be in Boolean True and False"
-    #             },
-    #             {
-    #                 "role": "user",
-    #                 "content": f"{textbox_input}",
-    #             }
-    #         ],
-    #         temperature=1.0,
-    #         top_p=1.0,
-    #         max_tokens=1000,
-    #         model=model_name
-    #     )
-
-    #     answer = response.choices[0].message.content
-
+    # 1. Define a list of callable tools for the mode
+    
     # if answer == 'True': #tool_calls
         
     #     get_exchange_rate()
