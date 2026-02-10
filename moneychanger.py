@@ -16,7 +16,7 @@ model_name = "gpt-4o-mini"
 os.environ['LANGCHAIN_TRACING_V2'] = True
 LANGSMITH_API_KEY = os.getenv('LANGSMITH_API_KEY')
 os.environ['LANGCHAIN_API_KEY'] = LANGSMITH_API_KEY
-os.environ['LANGCHAIN_PROJECT'] = 'moneychanger'
+os.environ['LANGCHAIN_PROJECT'] = 'Moneychanger'
 
 client = OpenAI(
     base_url=endpoint,
